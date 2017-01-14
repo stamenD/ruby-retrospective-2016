@@ -6,6 +6,7 @@ class Array
     result
   end
 end
+
 class String
   def match_first_part(with)  
     with.size.times do |i|
@@ -13,12 +14,14 @@ class String
     end
     true
   end
+
   def option_arg(with)
     additional_part = self[with.size..-1] if with.size == 2
     additional_part = self[(with.size + 1)..-1] if with.size > 2
     additional_part
   end
 end
+
 module BonusFunction
   def add_options_with_parameters(command_runner, argv)
     res = ''
@@ -32,6 +35,7 @@ module BonusFunction
     end  
   end
 end
+
 class CommandParser
   include BonusFunction
   def initialize(command_name)
@@ -40,17 +44,21 @@ class CommandParser
     @hash_option = {}
     @hash_option_plus_args = {}
   end
+
   def argument(name, &block)
     @hash_args.merge!({name => block})
   end
+
   def option(short_name, full_name, discription, &block)
     arr_option_names = [short_name, full_name, discription]
     @hash_option.merge!({arr_option_names => block})
   end
+
   def option_with_parameter(s_name, f_name, discription, placeholder, &block)
     arr_option_names = [s_name, f_name, discription, placeholder]
     @hash_option_plus_args.merge!({arr_option_names => block})
   end
+
   def parse(command_runner, argv)
     work = []
     argv.only_arg(work)
@@ -61,8 +69,10 @@ class CommandParser
         v.call command_runner, true 
       end
     end
+
     add_options_with_parameters(command_runner, argv)
   end
+  
   def help
     arg_row = "Usage: #{@command_name}"
     @hash_args.each { |k, _| arg_row += " [#{k}]" }
@@ -72,6 +82,5 @@ class CommandParser
       arg_row += "    -#{k[0]}, --#{k[1]}=#{k[3]} #{k[2]}\n"
     end
     arg_row
-+
   end
 end
