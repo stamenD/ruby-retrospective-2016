@@ -1,52 +1,25 @@
 class Hash
-  def find_type_of_key(source, key)
-    return key.to_i if source.is_a?(Array) && source.fetch(key.to_i) { false }
-    return key.to_i if source.is_a?(Hash) && source.key?(key.to_i)
-    return key.to_sym if source.is_a?(Hash) && source.key?(key.to_sym)
-    return key if source.is_a?(Hash) && source.key?(key)
-    nil                
-  end
-  def fetch_deep_with_index(source, path_in_arr, index)
-    if find_type_of_key(source, path_in_arr[index]) == nil
-      return nil
-    else
-      key = find_type_of_key(source, path_in_arr[index])
-    end
-    return source[key] if index == path_in_arr.size - 1
-    index += 1
-    fetch_deep_with_index(source[key], path_in_arr, index)
-  end
-  
   def fetch_deep(path)
-    arr = path.split(".") 
-    fetch_deep_with_index(self, arr, 0)
-  end 
-  def last_el(main_source)  
-    each do |k, v|  
-      if v.is_a?(Hash) == true
-        v.last_el(main_source)
-      else 
-        self[k] = main_source.fetch_deep(v.to_s)     
-      end  
+    path.split(".").reduce(self) do |memo, key|
+      memo == nil ? nil : memo[key.to_i] || memo[key.to_sym] || memo[key]
     end
   end
-  
-  def reshape(form)
-    form_work = {}
-    form.each do |k, v|
-      form_work.store(k, v)
-    end
-    form_work.last_el(self)
+
+  def reshape(shape)
+    shape.map do |k, v|
+      v.is_a?(Hash) ? [k, reshape(v)] : [k, fetch_deep(v)]
+    end.to_h
   end
 end 
 class Array
-  def reshape(form)
-    each do |e|
-      new_hash = e.reshape(form)
-      e.clear
-      new_hash.each do |k, v| 
-        e.store(k, v)
-      end
-    end
+  def reshape(shape)
+    map { |element| element.reshape(shape) }
+  end
+
+  def fetch_deep(key_path)
+    key, nested_key_path = key_path.split('.', 2)
+    element = self[key.to_i]
+
+    element.fetch_deep(nested_key_path) if element
   end
 end
