@@ -110,19 +110,19 @@ RSpec.describe 'Version' do
 end
 describe Version::Range do
   describe '#include?' do
-    let(:range) { Version::Range.new(Version.new('1.1.11'), Version.new('3.1.12')) }
+    let(:r) { Version::Range.new(Version.new('1.1.11'), Version.new('3.1.12')) }
    
     it 'returns whether a version is in the range' do
-      expect(range).to include Version.new('1.2.1')
-      expect(range).to include Version.new('1.100')
-      expect(range).to include Version.new('1.1.15')
-      expect(range).to include Version.new('2.5.55')     
+      expect(r).to include Version.new('1.2.1')
+      expect(r).to include Version.new('1.100')
+      expect(r).to include Version.new('1.1.15')
+      expect(r).to include Version.new('2.5.55')     
       
-      expect(range).to_not include Version.new('3.1.16')
-      expect(range).to_not include Version.new('3.2.0')
-      expect(range).to_not include Version.new('0.1')
-      expect(range).to_not include Version.new('1.1.10')
-      expect(range).to_not include Version.new('20.1.10')      
+      expect(r).to_not include Version.new('3.1.16')
+      expect(r).to_not include Version.new('3.2.0')
+      expect(r).to_not include Version.new('0.1')
+      expect(r).to_not include Version.new('1.1.10')
+      expect(r).to_not include Version.new('20.1.10')      
 
       test_object = Version::Range.new(Version.new('1'), Version.new('2'))
       expect(test_object.include?(Version.new('1.5'))).to be true
@@ -131,8 +131,8 @@ describe Version::Range do
     end
    
     it 'can be given a string' do
-      expect(range).to include '1.1.12'
-      expect(range).to_not include '3.1.15'
+      expect(r).to include '1.1.12'
+      expect(r).to_not include '3.1.15'
     end    
   end
 
@@ -158,10 +158,10 @@ describe Version::Range do
 
       range = Version::Range.new('1.1.2', '1.3')
       expect(range.to_a.map(&:to_s)).to match_array [
-          '1.1.2', '1.1.3', '1.1.4', '1.1.5', '1.1.6', '1.1.7', '1.1.8',
-          '1.1.9',
-          '1.2', '1.2.1', '1.2.2', '1.2.3', '1.2.4', '1.2.5', '1.2.6', '1.2.7',
-          '1.2.8', '1.2.9'
+        '1.1.2', '1.1.3', '1.1.4', '1.1.5', '1.1.6', '1.1.7', '1.1.8',
+        '1.1.9',
+        '1.2', '1.2.1', '1.2.2', '1.2.3', '1.2.4', '1.2.5', '1.2.6', '1.2.7',
+        '1.2.8', '1.2.9'
       ]
     end
   end    
