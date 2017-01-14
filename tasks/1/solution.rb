@@ -16,12 +16,18 @@ def convert_between_temperature_units(degree, input, output)
   end
 end
 
+SUBSTANCES = {
+  'water'   => {melting_point: 0,     boiling_point: 100  },
+  'ethanol' => {melting_point: -114,  boiling_point: 78.37},
+  'gold'    => {melting_point: 1_064, boiling_point: 2_700},
+  'silver'  => {melting_point: 961.8, boiling_point: 2_162},
+  'copper'  => {melting_point: 1_085, boiling_point: 2_567}
+}
+
 def melting_point_of_substance(element, measure)
-  elements_melt = {'water' => 0, 'ethanol' => -114, 'gold' => 1064, 'silver' => 961.8, 'copper' => 1085}
-  convert_between_temperature_units(elements_melt[element], 'C', measure)
+  convert_between_temperature_units(SUBSTANCES[element][:melting_point], 'C', measure)
 end
 
 def boiling_point_of_substance(element, measure)
-  elements_boil = {'water' => 100, 'ethanol' => 78.37, 'gold' => 2700, 'silver' => 2162, 'copper' => 2567}
-  convert_between_temperature_units(elements_boil[element], 'C', measure)
+  convert_between_temperature_units(SUBSTANCES[element][:boiling_point], 'C', measure)
 end
