@@ -2,8 +2,13 @@ class ArrayStore
   attr_reader :storage
   def initialize
     @storage = []
+    @id_counter = 0
   end
   
+  def next_id
+    @id_counter += 1
+  end
+
   alias_method :format_for_search, :storage
   def create(data = {})
     @storage.push data
@@ -20,17 +25,20 @@ class ArrayStore
   end
   
   def delete(data = {})
-    @storage.length.times do
-      @storage.each_with_index { |e, i| @storage.delete_at(i) if e == data }
-    end
+    find(data).each{ |elem|  @storage.delete(elem) }
   end
 end
 class HashStore
   attr_reader :storage
   def initialize
     @storage = {}
+    @id_counter = 0
   end
   
+  def next_id
+    @id_counter += 1
+  end
+
   def format_for_search
     res = []
     @storage.each { |_, v| res << v }
@@ -49,9 +57,7 @@ class HashStore
     @storage.each { |k, _| @storage[k] = new_data if k == id }
   end
   def delete(data = {})
-    @storage.length.times do
-      @storage.each { |k, v| @storage.delete(k) if v == data }
-    end
+    find(data).each{ |elem|  @storage.delete(elem[:id]) }
   end
 end
 module ClassMethods
@@ -80,21 +86,28 @@ module ClassMethods
     end
   end
   def where(** attributes2)
-    attributes2.each do |name, _|
-      raise UnknownAttributeError unless @attributes_array.include?(name)
-    end
+    attributes2.each_key.reject do |key|
+      @attributes_array.include?(key) 
+    end.each{ |key| raise DataModel::UnknownAttributeError.new(key) }
+  
     seek = attributes2.to_a
     @store.format_for_search.select do |e| 
       (e.to_a & seek) == seek
     end.map { |k| self.new(k.to_hash) }
   end
 end
+
 class DataModel
  
+  class UnknownAttributeError < ArgumentError
+    def initialize(attribute_name)
+      super "Unknown attribute #{attribute_name}"
+    end
+  end 
+
   class DeleteUnsavedRecordError < StandardError
-  end
-  class UnknownAttributeError < StandardError
-  end
+  end  
+
   attr_accessor :attributes_array, :store, :id
   extend ClassMethods
   def initialize(**attributes2)  
@@ -110,7 +123,8 @@ class DataModel
     bool_one || bool_two
   end
   def delete
-    raise DeleteUnsavedRecordError if self.class.data_store.find(to_hash).empty?
+    raise DeleteUnsavedRecordError.new if self.class.data_store.find(to_hash).empty?
+    p "dai"
     self.class.data_store.delete(to_hash)
     @id = nil
   end
@@ -118,13 +132,10 @@ class DataModel
     if @id
       self.class.data_store.update(@id, to_hash)  
     else
-      free_id = 0
-      self.class.data_store.format_for_search.each do |e| 
-        free_id = e[:id] if e[:id] > free_id
-      end    
-      @id = free_id + 1
+      @id = self.class.data_store.next_id
       self.class.data_store.create(to_hash)
     end
+    self
   end 
   
   def to_hash
