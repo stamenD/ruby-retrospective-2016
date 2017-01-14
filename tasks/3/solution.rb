@@ -1,12 +1,3 @@
-class Array
-  def only_arg(result)
-    each do |e|
-      result << e if e[0] != '-'
-    end
-    result
-  end
-end
-
 class String
   def match_first_part(with)  
     with.size.times do |i|
@@ -60,8 +51,7 @@ class CommandParser
   end
 
   def parse(command_runner, argv)
-    work = []
-    argv.only_arg(work)
+    work = argv.select { |e| e[0] != '-' }
     @hash_args.each_with_index { |e, i| e[1].call command_runner, work[i] }
     
     @hash_option.each do |k, v|
@@ -76,10 +66,9 @@ class CommandParser
   def help
     arg_row = "Usage: #{@command_name}"
     @hash_args.each { |k, _| arg_row += " [#{k}]" }
-    arg_row += "\n"
-    @hash_option.each { |k, _| arg_row += "    -#{k[0]}, --#{k[1]} #{k[2]}\n" }
+    @hash_option.each { |k, _| arg_row += "\n    -#{k[0]}, --#{k[1]} #{k[2]}" }
     @hash_option_plus_args.each do |k, _| 
-      arg_row += "    -#{k[0]}, --#{k[1]}=#{k[3]} #{k[2]}\n"
+      arg_row += "\n    -#{k[0]}, --#{k[1]}=#{k[3]} #{k[2]}"
     end
     arg_row
   end
