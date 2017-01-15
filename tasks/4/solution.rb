@@ -75,10 +75,24 @@ RSpec.describe 'Version' do
   end
 
   describe "#methods for compare" do
-    it 'correctly compares equal versions' do
-      expect(Version.new('')).to eq Version.new  
-      expect(Version.new('3.1.3')).to eq Version.new('3.1.3')  
-      expect(Version.new('1.2.3')).to_not eq Version.new('1.2')    
+    it 'can compare version to version' do
+      expect(Version.new('3.1.1')).to eq Version.new('3.1.1')
+    end
+
+    it 'correctly compares equal Version.newersions' do
+      expect(Version.new('11.3.4')).to eq Version.new('11.3.4')
+      expect(Version.new('3')     ).to eq Version.new('3')
+      expect(Version.new('3.6')   ).to eq Version.new('3.6')
+
+      expect(Version.new('3.5')).to_not eq Version.new('3.6')
+    end
+
+    it 'assumes unspecified components are zero' do
+      expect(Version.new('3.0.0.0.0')).to eq Version.new('3')
+      expect(Version.new('3.0.0.0.0')).to eq Version.new('3.0.0')
+      expect(Version.new('3.4')      ).to eq Version.new('3.4.0')
+      expect(Version.new('3.4')      ).to be < Version.new('3.4.1')
+      expect(Version.new('3.43.1')   ).to be < Version.new('3.43.1.1')
     end
 
     it 'compares simple inequalities' do
@@ -86,19 +100,30 @@ RSpec.describe 'Version' do
       expect(Version.new('0.1')  ).to be > Version.new('0')
       expect(Version.new('0.0.1')).to be > Version.new('0')
       expect(Version.new('0')    ).to_not be > Version.new('0.0.1')
-      expect(Version.new('1.2.3')).to_not be > Version.new('1.3.1')
-      expect(Version.new('1.2.3.0') > Version.new('1.2.3')).to be false    
-      expect(Version.new('1.2.3')).to be < Version.new('1.3.1')   
-      expect(Version.new('1.2.3.0')).to_not be < Version.new('1.2.3')  
+
+      expect(Version.new('1')    ).to be < Version.new('1.0.1')
+      expect(Version.new('1.1')  ).to be < Version.new('1.1.1')
+      expect(Version.new('11.3') ).to be < Version.new('11.3.1')
+      expect(Version.new('1.0.1')).to_not be < Version.new('1')
+
       expect(Version.new('1.23')).to be > Version.new('1.22')
       expect(Version.new('1.23')).to be > Version.new('1.4')
+
+      expect(Version.new('1.23.3')).to be > Version.new('1.4.8')
+      expect(Version.new('1.22.3')).to be < Version.new('1.23.2')
+
+      expect(Version.new('1.22.0.3')).to be < Version.new('1.23.0.2')
+      expect(Version.new('2.22.0.3')).to be > Version.new('1.23.0.2')
     end
-     
+
     it 'implements <= and >=' do
-      expect(Version.new('1.20.3.0')).to be <= Version.new('10.2.3')
-      expect(Version.new('1.2.0.0')).to be <= Version.new('1.2')
-      expect(Version.new('1.20.3.0')).to be >= Version.new('1.2.3')
-      expect(Version.new('1.2.0.0')).to be >= Version.new('1.2')
+      expect(Version.new('1.23')).to be >= Version.new('1.22')
+      expect(Version.new('1.23')).to be >= Version.new('1.23')
+      expect(Version.new('1.23')).to_not be >= Version.new('1.24')
+
+      expect(Version.new('1.23')).to be <= Version.new('1.24')
+      expect(Version.new('1.23')).to be <= Version.new('1.23')
+      expect(Version.new('1.23')).to_not be <= Version.new('1.21')
     end
     
     it 'implements <=>' do
@@ -108,7 +133,7 @@ RSpec.describe 'Version' do
     end    
   end
 end
-describe Version::Range do
+describe 'Version::Range' do
   describe '#include?' do
     let(:r) { Version::Range.new(Version.new('1.1.11'), Version.new('3.1.12')) }
    
